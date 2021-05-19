@@ -2,110 +2,95 @@ from replit import clear
 from art import logo
 import random
 
-cards = [11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
+def deal_card():    
+    cards = [11, 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]
+    card = random.choice(cards)
+    return card
 
-def compare_scores(player, computer):
-    if player["score"] > computer["score"]:
-        finish(player, computer)
-        print("You win. :)")
-        new_game()
-    elif player["score"] <  computer["score"]:
-        finish(player, computer)
-        print("You lose. :(")
-        new_game()
+def calculate_score(hand):
+    """Take a hand and calculates the score in it"""
+    score = sum(hand)
+    #To check if ther is a Blackjack
+    if len(hand)== 2 and score == 21:
+        return 0
+    #To check if there is an AS
+    if score > 21 and 11 in hand:
+            index = hand.index(11)
+            hand[index] -= 10
+            score -= 10
+    return score
+
+def compare_scores(player_score, computer_score):
+    if player_score == computer_score:
+        return "It's a draw. 🙃"
+    elif computer_score == 0:
+        return "Computer wins with a Blackjack. 😱"
+    elif player_score == 0:
+        return "Win with a Blackjack 😎"
+    elif computer_score > 21:
+        return "Computer went over. You win. 😃"
+    elif player_score > 21:
+        return "You went over. You lose. 😭 "
+    elif player_score > computer_score:
+        return "You win. 😃"
     else:
-        finish(player, computer)
-        print("It's a draw.")
-        new_game()
-      
+        return "You lose. 😭"
+          
 def finish(player, computer):
     print(f"  Your final hand: {player['hand']}, final score: {player['score']}")
 
     print(f"  Computer's final hand: {computer['hand']}, final score: {computer['score']}")
 
-def validate_scores (player,computer):
+def validate_scores (player_hand,computer_hand):
     
-    player["score"] = calculate_score(player)
+    player_score = calculate_score(player_hand)
 
-    computer["score"] = calculate_score(computer)
+    computer_score = calculate_score(computer_hand)
 
-    print(f"  Your cards: {player['hand']}, current score: {player['score']}")
+    print(f"  Your cards: {player_hand}, current score: {player_score}")
 
-    print(f"  Computer's first card:  {computer['hand'][0]}")
+    print(f"  Computer's first card:  {computer_hand[0]}")
 
-    if len(computer["hand"])== 2 and 10 in computer["hand"] and 11 in computer["hand"]:
-        print("Computer wins with a Blackjack. :(")
-        new_game()
-    elif len(player["hand"]) == 2 and 10 in player["hand"] and 11 in player["hand"]:
-        print("Player wins with a Blackjack. :)")
-        new_game()
+    if computer_score == 0 or player_score == 0 or player_score > 21 :
+        print(f"  Your final hand: {player_hand}, final score: {player_score}")
+
+        print(f"  Computer's final hand: {computer_hand}, final score: {computer_score}")
+
+        print(compare_scores(player_score, computer_score))
     else:
-        if player["score"] > 21:
-                finish(player,computer)
-                print("You went over. You lose :(")
-                new_game()
+        another_card = input("Type 'y' to get another card, type 'n' to pass: ").lower()
+
+        if another_card == "y":
+            player_hand.append(deal_card())
+            validate_scores(player_hand, computer_hand)
         else:
-            hit_card(player, computer)
+            while computer_score < 17:
+                computer_hand.append(deal_card())
+                computer_score = calculate_score(computer_hand)
 
-def hit_card(player, computer):
-# To check
-    another_card = input("Type 'y' to get another card, type 'n' to pass: ").lower()
+            print(f"  Your final hand: {player_hand}, final score: {player_score}")
 
-    if another_card == "y":
-        player["hand"].append(random.choice(cards))
+            print(f"  Computer's final hand: {computer_hand}, final score: {computer_score}")
 
-        validate_scores(player, computer)
-    else:
-        while computer["score"] < 17:
-            computer["hand"].append(random.choice(cards))
-            computer["score"] = calculate_score(computer)
-
-        if computer["score"] > 21:
-            finish(player, computer)
-            print("Computer went over. You win! :)")
-            new_game()
-        else:
-            compare_scores(player, computer)
-
-def calculate_score(player):
-    score = 0
-    for card in player["hand"]:
-        score += card
-        if score > 21 and 11 in player["hand"]:
-            index = player["hand"].index(11)
-            player["hand"][index] -= 10
-            score -= 10
-    return score
-
+            print(compare_scores(player_score, computer_score))
+            
 def start_game():
+    """Creates the initial hands for player and computer"""
     clear()
     print(logo)
-    
     player_hand = []
     computer_hand = []
 
     for number in range(2):
-        player_hand.append(random.choice(cards))
-        computer_hand.append(random.choice(cards))
-    
-    player = {
-        "hand" : player_hand,
-        "score" : 0
-    }
+        player_hand.append(deal_card())
+        computer_hand.append(deal_card())
 
-    computer = {
-        "hand" : computer_hand,
-        "score" : 0
-    }
-    
-    validate_scores(player,computer)
+    validate_scores(player_hand,computer_hand)
 
-def new_game():
-    start = input("Do you want to play a game of Blackjack? Type 'y' or 'n': ").lower()
-    if start == 'y':
-        start_game()
-        
-new_game()
+
+while input("Do you want to play a game of Blackjack? Type 'y' or 'n': ").lower() == "y":
+    start_game()
+
 
 
 # def black_jack_validation(player_hand,computer_hand):
@@ -177,4 +162,5 @@ new_game()
 ## The cards in the list have equal probability of being drawn.
 ## Cards are not removed from the deck as they are drawn.
 ## The computer is the dealer.
+
 
